@@ -120,14 +120,16 @@ class Player:
         self.consequent_doubles = 0
         self.in_jail = False
         self.days_in_jail = 0
-        self.hasJailCardChance = False
-        self.hasJailCardCommunity = False
-        self.isBankrupt = False
+        self.has_jail_card_chance = False
+        self.has_jail_card_community = False
+        self.is_bankrupt = False
         self.has_mortgages = []
         self.plots_wanted = []
         self.plots_offered = []
         self.plots_to_build = []
-        self.cash_limit = exp_unspendable_cash if name == "exp" else behave_unspendable_cash
+        self.cash_limit = (
+            exp_unspendable_cash if name == "exp" else behave_unspendable_cash
+        )
 
     def __str__(self):
         return (
@@ -167,7 +169,7 @@ class Player:
         go_again = False
 
         # Only proceed if player is alive (not bankrupt)
-        if self.isBankrupt:
+        if self.is_bankrupt:
             return
 
         # to track the popular cells to land
@@ -187,10 +189,14 @@ class Player:
 
         # Calculate property player wants to get and ready to give away
         if expRefuseTrade and self.name == "exp":
-            pass  # Experiement: do not trade
+            pass  # Experiment: do not trade
         elif behaveDoTrade:
             #  Make a trade
-            if not self.two_way_trade(board) and nPlayers >= 3 and behaveDoThreeWayTrade:
+            if (
+                not self.two_way_trade(board)
+                and nPlayers >= 3
+                and behaveDoThreeWayTrade
+            ):
                 self.three_way_trade(board)
 
         # roll dice
@@ -226,14 +232,14 @@ class Player:
         # Jail situation:
         # Stay unless you roll doubles
         if self.in_jail:
-            if self.hasJailCardChance:
-                self.hasJailCardChance = False
+            if self.has_jail_card_chance:
+                self.has_jail_card_chance = False
                 board.chanceCards.append(1)  # return the card
                 log.write(
                     self.name + " uses the Chance GOOJF card to get out of jail", 3
                 )
-            elif self.hasJailCardCommunity:
-                self.hasJailCardCommunity = False
+            elif self.has_jail_card_community:
+                self.has_jail_card_community = False
                 board.communityCards.append(6)  # return the card
                 log.write(
                     self.name + " uses the Community GOOJF card to get out of jail", 3
@@ -334,7 +340,7 @@ class Player:
             while self.money < 0:
                 worst_asset = board.choose_property_to_mortgage_downgrade(self)
                 if not worst_asset:
-                    self.isBankrupt = True
+                    self.is_bankrupt = True
                     board.sell_all(self)
                     board.recalculate_after_property_change()
                     log.write(
@@ -423,7 +429,8 @@ class Player:
                     else:
                         cheaper_one, expensive_one = they_want, i_want
                     price_diff = (
-                        board.b[expensive_one].cost_base - board.b[cheaper_one].cost_base
+                        board.b[expensive_one].cost_base
+                        - board.b[cheaper_one].cost_base
                     )
                     log.write("Price difference is $" + str(price_diff), 3)
 
@@ -474,8 +481,10 @@ class Player:
                         topay3 = board.b[wanted3].cost_base - board.b[wanted2].cost_base
                         if (
                             self.money - topay1 > self.cash_limit
-                            and owner_of_wanted1.money - topay2 > owner_of_wanted1.cash_limit
-                            and owner_of_wanted2.money - topay3 > owner_of_wanted2.cash_limit
+                            and owner_of_wanted1.money - topay2
+                            > owner_of_wanted1.cash_limit
+                            and owner_of_wanted2.money - topay3
+                            > owner_of_wanted2.cash_limit
                         ):
                             log.write("Tree way trade: ", 3)
                             log.write(
@@ -580,7 +589,7 @@ class Chance(Cell):
         # 1: Get Out Of Jail Free
         elif chance_card == 1:
             log.write(player.name + " gets chance card: Get Out Of Jail Free", 3)
-            player.hasJailCardChance = True
+            player.has_jail_card_chance = True
 
         # 2: Take a ride on the Reading
         elif chance_card == 2:
@@ -673,7 +682,7 @@ class Chance(Cell):
                 3,
             )
             for other_player in board.players:
-                if other_player != player and not other_player.isBankrupt:
+                if other_player != player and not other_player.is_bankrupt:
                     player.take_money(50)
                     other_player.add_money(50)
 
@@ -733,7 +742,7 @@ class Community(Cell):
         if community_card == 1:
             log.write(player.name + " Opera night: collect $50 from each player", 3)
             for other_player in board.players:
-                if other_player != player and not other_player.isBankrupt:
+                if other_player != player and not other_player.is_bankrupt:
                     player.add_money(50)
                     other_player.take_money(50)
                     other_player.check_bankruptcy(board)
@@ -763,7 +772,7 @@ class Community(Cell):
         # 6: Get Out Of Jail Free
         elif community_card == 6:
             log.write(player.name + " gets community card: Get Out Of Jail Free", 3)
-            player.hasJailCardCommunity = True
+            player.has_jail_card_community = True
 
         # 7: Second prize in beauty contest $10
         if community_card == 7:
@@ -1149,7 +1158,7 @@ class Board:
             # rail
             elif self.b[position].group == "rail":
                 rails = self.count_rails(position)
-                rent = 0 if rails == 0 else 25 * 2 ** rails
+                rent = 0 if rails == 0 else 25 * 2**rails
                 if special == "from_chance":
                     rent *= 2
 
@@ -1187,7 +1196,11 @@ class Board:
         owned_stuff = []
         for i in range(len(self.b)):
             plot = self.b[i]
-            if type(plot) == Property and not plot.is_mortgaged and plot.owner == player:
+            if (
+                type(plot) == Property
+                and not plot.is_mortgaged
+                and plot.owner == player
+            ):
                 owned_stuff.append(
                     (
                         i,
@@ -1457,7 +1470,7 @@ def is_game_over(players):
     """Check if there are more then 1 player left in the game"""
     alive = 0
     for player in players:
-        if not player.isBankrupt:
+        if not player.is_bankrupt:
             alive += 1
     if alive > 1:
         return False
