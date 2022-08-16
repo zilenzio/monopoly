@@ -17,11 +17,11 @@ import progressbar
 import util
 
 # simulation settings
-nPlayers = 4
+n_players = 4
 nMoves = 1000
 nSimulations = 1000
 seed = ""  # "" for none
-shufflePlayers = True
+shuffle_players = True
 realTime = False  # Allow step by step execution via space/enter key
 
 # some game rules
@@ -194,7 +194,7 @@ class Player:
             #  Make a trade
             if (
                 not self.two_way_trade(board)
-                and nPlayers >= 3
+                and n_players >= 3
                 and behaveDoThreeWayTrade
             ):
                 self.three_way_trade(board)
@@ -1485,11 +1485,10 @@ def one_game():
 
     # create players
     players = []
-    # names = ["pl"+str(i) for i in range(nPlayers)]
-    names = [util.fetch_player_name(i + 1) for i in range(nPlayers)]
-    if shufflePlayers:
+    names = [util.fetch_player_name(i) for i in range(n_players)]
+    if shuffle_players:
         random.shuffle(names)
-    for i in range(nPlayers):
+    for i in range(n_players):
         if not variable_starting_money:
             starting_money = settingStartingMoney
         else:
@@ -1547,7 +1546,7 @@ def one_game():
     # player.threeWayTrade(game_board)
 
     # return final scores
-    results = [players[i].get_money() for i in range(nPlayers)]
+    results = [players[i].get_money() for i in range(n_players)]
 
     # if it is an only simulation, print map and final score
     if nSimulations == 1 and showMap:
@@ -1594,7 +1593,7 @@ def analyze_results(results):
 
     remaining_players = [
         0,
-    ] * nPlayers
+    ] * n_players
     for result in results:
         alive = 0
         for score in result:
@@ -1637,7 +1636,7 @@ def analyze_data():
             print("{}: {:.1%} +- {:.1%}".format(item, count, margin))
 
         if experiment != 0:
-            print("Exp result: {:.1%}".format(experiment - control / (nPlayers - 1)))
+            print("Exp result: {:.1%}".format(experiment - control / (n_players - 1)))
 
     if writeData == "net_worth":
         print("graph here")
@@ -1646,7 +1645,7 @@ def analyze_data():
 
         plt.ioff()
         fig, ax = plt.subplots()
-        for i in range(nPlayers):
+        for i in range(n_players):
             ax.plot(x, npdata[i], label="1")
         plt.savefig("fig" + str(time.time()) + ".png")
 
@@ -1662,7 +1661,14 @@ if __name__ == "__main__":
     else:
         random.seed()
     print(
-        "Players:", nPlayers, " Turns:", nMoves, " Games:", nSimulations, " Seed:", seed
+        "Players:",
+        n_players,
+        " Turns:",
+        nMoves,
+        " Games:",
+        nSimulations,
+        " Seed:",
+        seed,
     )
     results = run_simulation()
     analyze_results(results)

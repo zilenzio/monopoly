@@ -10,5 +10,5 @@ PLAYER_NAMES = [
 ]
 
 
-def fetch_player_name(number):
-    return PLAYER_NAMES[number - 1]
+def fetch_player_name(i):
+    return PLAYER_NAMES[i]
