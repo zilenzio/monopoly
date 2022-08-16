@@ -51,7 +51,7 @@ exp_unspendable_cash = 0  # unspendable money
 expBuildCheapest = False
 expBuildExpensive = False
 expBuildThree = False
-variable_starting_money = []  # [1370, 1460, 1540, 1630] # [] to disable
+var_starting_money = []  # [1370, 1460, 1540, 1630] # [] to disable
 
 
 # reporting settings
@@ -1481,19 +1481,31 @@ def is_game_over(players):
 # simulate one game
 
 
+def build_player_list(n: int, starting_monies=[]):
+    if not 1 < n <= 8:
+        raise ValueError("Number of Players must be 2-8")
+    n = n_players
+    names = [util.fetch_player_name(i) for i in range(n)]
+    if not var_starting_money:
+        starting_monies = [settingStartingMoney] * n
+    else:
+        starting_monies = [
+            var_starting_money[i % len(var_starting_money)] for i in range(n)
+        ]
+    players_attributes = []
+    for i in range(n):
+        player_attributes = (names[i], starting_monies[i])
+        players_attributes.append(player_attributes)
+    if shuffle_players:
+        random.shuffle(players_attributes)
+    players = [Player(pa[0], pa[1]) for pa in players_attributes]
+    return players
+
+
 def one_game():
 
     # create players
-    players = []
-    names = [util.fetch_player_name(i) for i in range(n_players)]
-    if shuffle_players:
-        random.shuffle(names)
-    for i in range(n_players):
-        if not variable_starting_money:
-            starting_money = settingStartingMoney
-        else:
-            starting_money = variable_starting_money[i]
-        players.append(Player(names[i], starting_money))
+    players = build_player_list(n_players)
 
     # create board
     game_board = Board(players)
