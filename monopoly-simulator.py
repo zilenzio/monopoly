@@ -1486,7 +1486,7 @@ def one_game():
     # create players
     players = []
     # names = ["pl"+str(i) for i in range(nPlayers)]
-    names = [util.cardinal(i + 1) for i in range(nPlayers)]
+    names = [util.fetch_player_name(i + 1) for i in range(nPlayers)]
     if shufflePlayers:
         random.shuffle(names)
     for i in range(nPlayers):
