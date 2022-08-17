@@ -16,6 +16,8 @@ import progressbar
 
 import util
 
+from collections import deque
+
 # simulation settings
 n_players = 4
 nMoves = 1000
@@ -577,7 +579,7 @@ class Chance(Cell):
     def action(self, player, board):
 
         # Get the card
-        chance_card = board.chanceCards.pop(0)
+        chance_card = board.chanceCards.popleft()
 
         # Actions for various cards
 
@@ -734,7 +736,7 @@ class Community(Cell):
     def action(self, player, board):
 
         # Get the card
-        community_card = board.communityCards.pop(0)
+        community_card = board.communityCards.popleft()
 
         # Actions for various cards
 
@@ -1258,11 +1260,11 @@ class Board:
         self.nHotels = 0
 
         # Chance
-        self.chanceCards = [i for i in range(16)]
+        self.chanceCards = deque([i for i in range(16)])
         random_shuffle.shuffle(self.chanceCards)
 
         # Community Chest
-        self.communityCards = [i for i in range(16)]
+        self.communityCards = deque([i for i in range(16)])
         random_shuffle.shuffle(self.communityCards)
 
     # Does the board have at least one monopoly
