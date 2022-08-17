@@ -134,7 +134,7 @@ class Player:
         self.cash_limit = (
             exp_unspendable_cash if name == "exp" else behave_unspendable_cash
         )
-        self.dice = (0,0)
+        self.dice = (0, 0)
 
     def __str__(self):
         return (
@@ -1163,10 +1163,9 @@ class Board:
                     rent = dice_value * 4
 
             # rail
-            # TODO: Formula for growing rent is base (25) * number of rails
             elif self.b[position].group == "rail":
                 rails = self.count_rails(position)
-                rent = 0 if rails == 0 else 25 * 2**rails
+                rent = 25 * rails
                 if special == "from_chance":
                     rent *= 2
 
@@ -1441,7 +1440,7 @@ class Board:
         # Landed on a property - calculate rent first
         if type(self.b[position]) == Property:
             # calculate the rent one would have to pay (but not pay it yet)
-            rent = self.calculate_rent(position, dice = player.dice, special=special)
+            rent = self.calculate_rent(position, dice=player.dice, special=special)
             # pass action to to the cell
             self.b[position].action(player, rent, self)
         # landed on a chance, pass board, to track the chance cards
