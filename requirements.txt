@@ -2,6 +2,6 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-matplotlib
-numpy
-progressbar2
+matplotlib~=3.5.3
+numpy~=1.23.2
+progressbar2~=4.0.0
