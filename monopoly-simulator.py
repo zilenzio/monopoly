@@ -134,6 +134,7 @@ class Player:
         self.cash_limit = (
             exp_unspendable_cash if name == "exp" else behave_unspendable_cash
         )
+        self.dice = (0,0)
 
     def __str__(self):
         return (
@@ -216,6 +217,7 @@ class Player:
             + str(dice1 + dice2),
             3,
         )
+        self.dice = (dice1, dice2)
 
         # doubles
         if dice1 == dice2 and not self.in_jail:
@@ -1148,17 +1150,17 @@ class Board:
     # What is the rent of plot "position"
     # Takes into account utilities, rails, monopoly
 
-    def calculate_rent(self, position, special=""):
+    def calculate_rent(self, position, dice, special=""):
         if type(self.b[position]) == Property:
             rent = 0
+            dice_value = sum(dice)
 
             # utility
-            # TODO: rent shall be calculated based on the existing dice roll, not a new roll
             if self.b[position].group == "util":
                 if self.b[position].is_monopoly or special == "from_chance":
-                    rent = (random_dice.randint(1, 6) + random_dice.randint(1, 6)) * 10
+                    rent = dice_value * 10
                 else:
-                    rent = (random_dice.randint(1, 6) + random_dice.randint(1, 6)) * 4
+                    rent = dice_value * 4
 
             # rail
             # TODO: Formula for growing rent is base (25) * number of rails
@@ -1439,7 +1441,7 @@ class Board:
         # Landed on a property - calculate rent first
         if type(self.b[position]) == Property:
             # calculate the rent one would have to pay (but not pay it yet)
-            rent = self.calculate_rent(position, special=special)
+            rent = self.calculate_rent(position, dice = player.dice, special=special)
             # pass action to to the cell
             self.b[position].action(player, rent, self)
         # landed on a chance, pass board, to track the chance cards
