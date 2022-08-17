@@ -183,10 +183,10 @@ class Player:
         if writeData == "popular_cells":
             log.write(str(self.position), data=True)
 
-        log.write("Player " + self.name + " goes:", 2)
+        log.write(f"Player {self.name} goes:", 2)
 
         # non-board actions: Trade, unmortgage, build
-        # repay mortgage if you have X times more cashe than mortgage cost
+        # repay mortgage if you have X times more cash than mortgage cost
         while self.repay_mortgage():
             board.recalculate_after_property_change()
 
@@ -306,7 +306,7 @@ class Player:
     # get the cheapest mortgage property (name, price)
 
     def cheapest_mortgage(self):
-        cheapest = False
+        cheapest = None
         for mortgage in self.has_mortgages:
             if not cheapest or mortgage[1] < cheapest[1]:
                 cheapest = mortgage
