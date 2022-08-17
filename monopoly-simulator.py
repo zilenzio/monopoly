@@ -276,18 +276,17 @@ class Player:
             self.add_money(settingsSalary)
             log.write(self.name + " gets salary: $" + str(settingsSalary), 3)
 
+        owner_name = ""
+        if hasattr(board.b[self.position], 'owner'):
+            if hasattr(board.b[self.position].owner, 'name'):
+                owner_name = board.b[self.position].owner.name
         log.write(
             self.name
             + " moves to cell "
             + str(self.position)
             + ": "
             + board.b[self.position].name
-            + (
-                " (" + board.b[self.position].owner.name + ")"
-                if type(board.b[self.position]) == Property
-                and board.b[self.position].owner != ""
-                else ""
-            ),
+            + owner_name,
             3,
         )
 
@@ -409,7 +408,7 @@ class Player:
         trade_happened = False
         for i_want in self.plots_wanted[::-1]:
             owner_of_wanted = board.b[i_want].owner
-            if owner_of_wanted == "":
+            if owner_of_wanted is None:
                 continue
             # Find a match betwee what I want / they want / I have / they have
             for they_want in owner_of_wanted.plots_wanted[::-1]:
@@ -464,11 +463,11 @@ class Player:
         trade_happened = False
         for wanted1 in self.plots_wanted[::-1]:
             owner_of_wanted1 = board.b[wanted1].owner
-            if owner_of_wanted1 == "":
+            if owner_of_wanted1 is None:
                 continue
             for wanted2 in owner_of_wanted1.plots_wanted[::-1]:
                 owner_of_wanted2 = board.b[wanted2].owner
-                if owner_of_wanted2 == "":
+                if owner_of_wanted2 is None:
                     continue
                 for wanted3 in owner_of_wanted2.plots_wanted[::-1]:
                     if wanted3 in self.plots_offered:
@@ -859,7 +858,7 @@ class Property(Cell):
         self.cost_house = cost_house
         self.rent_house = rent_house
         self.group = group
-        self.owner = ""
+        self.owner = None
         self.is_mortgaged = False
         self.is_monopoly = False
         self.hasHouses = 0
@@ -873,7 +872,7 @@ class Property(Cell):
             return
 
         # Property up for sale
-        elif self.owner == "":
+        elif self.owner is None:
             if player.wants_to_buy(self.cost_base, self.group):
                 log.write(
                     player.name
@@ -1132,19 +1131,16 @@ class Board:
     # Count the number of rails of the same owner as "position"
     # Used in rent calculations
     def count_rails(self, position):
-        if type(self.b[position]) != Property or self.b[position].group != "rail":
-            return False
         railcount = 0
         this_owner = self.b[position].owner
-        for plot in self.b:
-            if (
-                type(plot) == Property
-                and plot.group == "rail"
-                and plot.owner == this_owner
-                and plot.owner != ""
-                and not plot.is_mortgaged
-            ):
-                railcount += 1
+        if this_owner:
+            for plot in self.b:
+                if (
+                    type(plot) == Property
+                    and plot.group == "rail"
+                    and plot.owner == this_owner
+                ):
+                    railcount += 1
         return railcount
 
     # What is the rent of plot "position"
@@ -1351,7 +1347,7 @@ class Board:
     def sell_all(self, player):
         for plot in self.b:
             if type(plot) == Property and plot.owner == player:
-                plot.owner = ""
+                plot.owner = None
                 plot.is_mortgaged = False
 
     # Get the list of plots player would want to get
@@ -1408,7 +1404,7 @@ class Board:
         for i in range(len(self.b)):
             plot = self.b[i]
             if type(plot) == Property:
-                if plot.owner == "":
+                if plot.owner is None:
                     groups[plot.group] = False
                 else:
                     if plot.group in groups:
