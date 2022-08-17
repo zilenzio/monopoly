@@ -276,17 +276,17 @@ class Player:
             self.add_money(settingsSalary)
             log.write(self.name + " gets salary: $" + str(settingsSalary), 3)
 
-        owner_name = ""
+        owner_str = ""
         if hasattr(board.b[self.position], 'owner'):
             if hasattr(board.b[self.position].owner, 'name'):
-                owner_name = board.b[self.position].owner.name
+                owner_str = f" ({board.b[self.position].owner.name})"
         log.write(
             self.name
             + " moves to cell "
             + str(self.position)
             + ": "
             + board.b[self.position].name
-            + owner_name,
+            + owner_str,
             3,
         )
 
