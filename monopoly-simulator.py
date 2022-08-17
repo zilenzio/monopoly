@@ -277,8 +277,8 @@ class Player:
             log.write(self.name + " gets salary: $" + str(settingsSalary), 3)
 
         owner_str = ""
-        if hasattr(board.b[self.position], 'owner'):
-            if hasattr(board.b[self.position].owner, 'name'):
+        if hasattr(board.b[self.position], "owner"):
+            if hasattr(board.b[self.position].owner, "name"):
                 owner_str = f" ({board.b[self.position].owner.name})"
         log.write(
             self.name
@@ -851,7 +851,15 @@ class Community(Cell):
 class Property(Cell):
     """Property Class (for Properties, Rails, Utilities)"""
 
-    def __init__(self, name, cost_base, rent_base, cost_house, rent_house, group):
+    def __init__(
+        self,
+        name,
+        cost_base,
+        rent_base,
+        cost_house,
+        rent_house,
+        group: util.PropertyGroup,
+    ):
         Cell.__init__(self, name)
         self.cost_base = cost_base
         self.rent_base = rent_base
@@ -958,27 +966,56 @@ class Board:
         self.b.append(Cell("Go"))
         self.b.append(
             Property(
-                "A1 Mediterraneal Avenue", 60, 2, 50, (10, 30, 90, 160, 250), "brown"
+                "A1 Mediterranean Avenue",
+                60,
+                2,
+                50,
+                (10, 30, 90, 160, 250),
+                util.PropertyGroup.BROWN,
             )
         )
         self.b.append(Community("Community Chest"))
         self.b.append(
-            Property("A2 Baltic Avenue", 60, 4, 50, (20, 60, 180, 320, 450), "brown")
+            Property(
+                "A2 Baltic Avenue",
+                60,
+                4,
+                50,
+                (20, 60, 180, 320, 450),
+                util.PropertyGroup.BROWN,
+            )
         )
         self.b.append(PropertyTax("Property Tax"))
         # 5-9
         self.b.append(
-            Property("R1 Reading railroad", 200, 0, 0, (0, 0, 0, 0, 0), "rail")
+            Property(
+                "R1 Reading railroad",
+                200,
+                0,
+                0,
+                (0, 0, 0, 0, 0),
+                util.PropertyGroup.RAILROAD,
+            )
         )
         self.b.append(
             Property(
-                "B1 Oriental Avenue", 100, 6, 50, (30, 90, 270, 400, 550), "lightblue"
+                "B1 Oriental Avenue",
+                100,
+                6,
+                50,
+                (30, 90, 270, 400, 550),
+                util.PropertyGroup.LIGHT_BLUE,
             )
         )
         self.b.append(Chance("Chance"))
         self.b.append(
             Property(
-                "B2 Vermont Avenue", 100, 6, 50, (30, 90, 270, 400, 550), "lightblue"
+                "B2 Vermont Avenue",
+                100,
+                6,
+                50,
+                (30, 90, 270, 400, 550),
+                util.PropertyGroup.LIGHT_BLUE,
             )
         )
         self.b.append(
@@ -988,88 +1025,182 @@ class Board:
                 8,
                 50,
                 (40, 100, 300, 450, 600),
-                "lightblue",
+                util.PropertyGroup.LIGHT_BLUE,
             )
         )
         # 10-14
         self.b.append(Cell("Prison"))
         self.b.append(
             Property(
-                "C1 St.Charles Place", 140, 10, 100, (50, 150, 450, 625, 750), "pink"
+                "C1 St.Charles Place",
+                140,
+                10,
+                100,
+                (50, 150, 450, 625, 750),
+                util.PropertyGroup.PINK,
             )
         )
         self.b.append(
-            Property("U1 Electric Company", 150, 0, 0, (0, 0, 0, 0, 0), "util")
-        )
-        self.b.append(
-            Property("C2 States Avenue", 140, 10, 100, (50, 150, 450, 625, 750), "pink")
+            Property(
+                "U1 Electric Company",
+                150,
+                0,
+                0,
+                (0, 0, 0, 0, 0),
+                util.PropertyGroup.UTILITY,
+            )
         )
         self.b.append(
             Property(
-                "C3 Virginia Avenue", 160, 12, 100, (60, 180, 500, 700, 900), "pink"
+                "C2 States Avenue",
+                140,
+                10,
+                100,
+                (50, 150, 450, 625, 750),
+                util.PropertyGroup.PINK,
+            )
+        )
+        self.b.append(
+            Property(
+                "C3 Virginia Avenue",
+                160,
+                12,
+                100,
+                (60, 180, 500, 700, 900),
+                util.PropertyGroup.PINK,
             )
         )
         # 15-19
         self.b.append(
-            Property("R2 Pennsylvania Railroad", 200, 0, 0, (0, 0, 0, 0, 0), "rail")
+            Property(
+                "R2 Pennsylvania Railroad",
+                200,
+                0,
+                0,
+                (0, 0, 0, 0, 0),
+                util.PropertyGroup.RAILROAD,
+            )
         )
         self.b.append(
             Property(
-                "D1 St.James Place", 180, 14, 100, (70, 200, 550, 700, 950), "orange"
+                "D1 St.James Place",
+                180,
+                14,
+                100,
+                (70, 200, 550, 700, 950),
+                util.PropertyGroup.ORANGE,
             )
         )
         self.b.append(Community("Community Chest"))
         self.b.append(
             Property(
-                "D2 Tennessee Avenue", 180, 14, 100, (70, 200, 550, 700, 950), "orange"
+                "D2 Tennessee Avenue",
+                180,
+                14,
+                100,
+                (70, 200, 550, 700, 950),
+                util.PropertyGroup.ORANGE,
             )
         )
         self.b.append(
             Property(
-                "D3 New York Avenue", 200, 16, 100, (80, 220, 600, 800, 1000), "orange"
+                "D3 New York Avenue",
+                200,
+                16,
+                100,
+                (80, 220, 600, 800, 1000),
+                util.PropertyGroup.ORANGE,
             )
         )
         # 20-24
         self.b.append(Cell("Free Parking"))
         self.b.append(
             Property(
-                "E1 Kentucky Avenue", 220, 18, 150, (90, 250, 700, 875, 1050), "red"
+                "E1 Kentucky Avenue",
+                220,
+                18,
+                150,
+                (90, 250, 700, 875, 1050),
+                util.PropertyGroup.RED,
             )
         )
         self.b.append(Chance("Chance"))
         self.b.append(
             Property(
-                "E2 Indiana Avenue", 220, 18, 150, (90, 250, 700, 875, 1050), "red"
+                "E2 Indiana Avenue",
+                220,
+                18,
+                150,
+                (90, 250, 700, 875, 1050),
+                util.PropertyGroup.RED,
             )
         )
         self.b.append(
             Property(
-                "E3 Illinois Avenue", 240, 20, 150, (100, 300, 750, 925, 1100), "red"
+                "E3 Illinois Avenue",
+                240,
+                20,
+                150,
+                (100, 300, 750, 925, 1100),
+                util.PropertyGroup.RED,
             )
         )
         # 25-29
-        self.b.append(Property("R3 BnO Railroad", 200, 0, 0, (0, 0, 0, 0, 0), "rail"))
         self.b.append(
             Property(
-                "F1 Atlantic Avenue", 260, 22, 150, (110, 330, 800, 975, 1150), "yellow"
+                "R3 BnO Railroad",
+                200,
+                0,
+                0,
+                (0, 0, 0, 0, 0),
+                util.PropertyGroup.RAILROAD,
             )
         )
         self.b.append(
             Property(
-                "F2 Ventinor Avenue", 260, 22, 150, (110, 330, 800, 975, 1150), "yellow"
+                "F1 Atlantic Avenue",
+                260,
+                22,
+                150,
+                (110, 330, 800, 975, 1150),
+                util.PropertyGroup.YELLOW,
             )
         )
-        self.b.append(Property("U2 Waterworks", 150, 0, 0, (0, 0, 0, 0, 0), "util"))
         self.b.append(
             Property(
-                "F3 Martin Gardens", 280, 24, 150, (120, 360, 850, 1025, 1200), "yellow"
+                "F2 Ventinor Avenue",
+                260,
+                22,
+                150,
+                (110, 330, 800, 975, 1150),
+                util.PropertyGroup.YELLOW,
+            )
+        )
+        self.b.append(
+            Property(
+                "U2 Waterworks", 150, 0, 0, (0, 0, 0, 0, 0), util.PropertyGroup.UTILITY
+            )
+        )
+        self.b.append(
+            Property(
+                "F3 Martin Gardens",
+                280,
+                24,
+                150,
+                (120, 360, 850, 1025, 1200),
+                util.PropertyGroup.YELLOW,
             )
         )
         # 30-34
         self.b.append(GoToJail("Go To Jail"))
         self.b.append(
             Property(
-                "G1 Pacific Avenue", 300, 26, 200, (130, 390, 900, 1100, 1275), "green"
+                "G1 Pacific Avenue",
+                300,
+                26,
+                200,
+                (130, 390, 900, 1100, 1275),
+                util.PropertyGroup.GREEN,
             )
         )
         self.b.append(
@@ -1079,7 +1210,7 @@ class Board:
                 26,
                 200,
                 (130, 390, 900, 1100, 1275),
-                "green",
+                util.PropertyGroup.GREEN,
             )
         )
         self.b.append(Community("Community Chest"))
@@ -1090,21 +1221,35 @@ class Board:
                 28,
                 200,
                 (150, 450, 100, 1200, 1400),
-                "green",
+                util.PropertyGroup.GREEN,
             )
         )
         # 35-39
-        self.b.append(Property("R4 Short Line", 200, 0, 0, (0, 0, 0, 0, 0), "rail"))
+        self.b.append(
+            Property(
+                "R4 Short Line", 200, 0, 0, (0, 0, 0, 0, 0), util.PropertyGroup.RAILROAD
+            )
+        )
         self.b.append(Chance("Chance"))
         self.b.append(
             Property(
-                "H1 Park Place", 350, 35, 200, (175, 500, 1100, 1300, 1500), "indigo"
+                "H1 Park Place",
+                350,
+                35,
+                200,
+                (175, 500, 1100, 1300, 1500),
+                util.PropertyGroup.INDIGO,
             )
         )
         self.b.append(LuxuryTax("Luxury Tax"))
         self.b.append(
             Property(
-                "H2 Boardwalk", 400, 50, 200, (200, 600, 1400, 1700, 2000), "indigo"
+                "H2 Boardwalk",
+                400,
+                50,
+                200,
+                (200, 600, 1400, 1700, 2000),
+                util.PropertyGroup.INDIGO,
             )
         )
 
@@ -1137,7 +1282,7 @@ class Board:
             for plot in self.b:
                 if (
                     type(plot) == Property
-                    and plot.group == "rail"
+                    and plot.group == util.PropertyGroup.RAILROAD
                     and plot.owner == this_owner
                 ):
                     railcount += 1
@@ -1152,14 +1297,14 @@ class Board:
             dice_value = sum(dice)
 
             # utility
-            if self.b[position].group == "util":
+            if self.b[position].group == util.PropertyGroup.UTILITY:
                 if self.b[position].is_monopoly or special == "from_chance":
                     rent = dice_value * 10
                 else:
                     rent = dice_value * 4
 
             # rail
-            elif self.b[position].group == "rail":
+            elif self.b[position].group == util.PropertyGroup.RAILROAD:
                 rails = self.count_rails(position)
                 rent = 25 * rails
                 if special == "from_chance":
@@ -1232,8 +1377,8 @@ class Board:
                 type(plot) == Property
                 and self.b[i].is_monopoly
                 and plot.owner == player
-                and plot.group != "rail"
-                and plot.group != "util"
+                and plot.group != util.PropertyGroup.RAILROAD
+                and plot.group != util.PropertyGroup.UTILITY
                 and plot.hasHouses < 5
             ):
                 # limit max houses experiment
@@ -1258,7 +1403,7 @@ class Board:
             return []
 
         # remove those that has more houses than other plots in monopoly (to ensure gradual development)
-        to_build_stuff.sort(key=lambda x: (x[2], x[3]))
+        to_build_stuff.sort(key=lambda x: (x[2].value, x[3]))
         for i in range(len(to_build_stuff) - 1, -1, -1):
             # if it has more houses than minimum in that group, remove
             if to_build_stuff[i][3] > min_in_group[to_build_stuff[i][2]]:
@@ -1365,7 +1510,10 @@ class Board:
                     groups[plot.group][1] += 1
         wanted = []
         for group in groups:
-            if group != "util" and groups[group][0] - groups[group][1] == 1:
+            if (
+                group != util.PropertyGroup.UTILITY
+                and groups[group][0] - groups[group][1] == 1
+            ):
                 for i in range(len(self.b)):
                     if (
                         type(self.b[i]) == Property
@@ -1387,7 +1535,7 @@ class Board:
                     groups[plot.group] += 1
         offered = []
         for group in groups:
-            if group != "util" and groups[group] == 1:
+            if group != util.PropertyGroup.UTILITY and groups[group] == 1:
                 for i in range(len(self.b)):
                     if (
                         type(self.b[i]) == Property
