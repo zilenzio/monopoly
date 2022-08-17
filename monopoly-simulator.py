@@ -1270,10 +1270,11 @@ class Board:
     # Does the board have at least one monopoly
     # Used for statistics
     def has_monopoly(self):
-        for i in range(len(self.b)):
-            if self.b[i].is_monopoly:
+        for plot in self.b:
+            if plot.is_monopoly:
                 return True
         return False
+
 
     # Count the number of rails of the same owner as "position"
     # Used in rent calculations
@@ -1294,19 +1295,20 @@ class Board:
     # Takes into account utilities, rails, monopoly
 
     def calculate_rent(self, position, dice, special=""):
-        if type(self.b[position]) == Property:
-            rent = 0
+        plot = self.b[position]
+        rent = 0
+        if type(plot) == Property:
             dice_value = sum(dice)
 
             # utility
-            if self.b[position].group == util.PropertyGroup.UTILITY:
-                if self.b[position].is_monopoly or special == "from_chance":
+            if plot.group == util.PropertyGroup.UTILITY:
+                if plot.is_monopoly or special == "from_chance":
                     rent = dice_value * 10
                 else:
                     rent = dice_value * 4
 
             # rail
-            elif self.b[position].group == util.PropertyGroup.RAILROAD:
+            elif plot.group == util.PropertyGroup.RAILROAD:
                 rails = self.count_rails(position)
                 rent = 25 * rails
                 if special == "from_chance":
@@ -1314,16 +1316,12 @@ class Board:
 
             # usual property
             else:
-                if self.b[position].hasHouses > 0:
-                    if self.b[position].hasHouses - 1 > 5:
-                        print(self.b[position].hasHouses - 1)
-                        print(position)
-                        self.print_map()
-                    rent = self.b[position].rent_house[self.b[position].hasHouses - 1]
-                elif self.b[position].is_monopoly:
-                    rent = 2 * self.b[position].rent_base
+                if plot.hasHouses > 0:
+                    rent = plot.rent_house[plot.hasHouses - 1]
+                elif plot.is_monopoly:
+                    rent = 2 * plot.rent_base
                 else:
-                    rent = self.b[position].rent_base
+                    rent = plot.rent_base
         return rent
 
     # What % of plots of this group does player have
@@ -1344,8 +1342,7 @@ class Board:
     def choose_property_to_mortgage_downgrade(self, player):
         # list all the items this player has:
         owned_stuff = []
-        for i in range(len(self.b)):
-            plot = self.b[i]
+        for i, plot, in enumerate(self.b):
             if (
                 type(plot) == Property
                 and not plot.is_mortgaged
@@ -1362,7 +1359,7 @@ class Board:
                 )
         if len(owned_stuff) == 0:
             return False
-        # first to sel/mortgage are: least "monopolistic"; most houses
+        # first to sell/mortgage are: least "monopolistic"; most houses
         owned_stuff.sort(key=lambda x: (x[3], -x[4]))
         return owned_stuff[0][0]
 
