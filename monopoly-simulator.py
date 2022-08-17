@@ -20,7 +20,7 @@ import util
 n_players = 4
 nMoves = 1000
 nSimulations = 1000
-seed = ""  # "" for none
+SEED = None
 shuffle_players = True
 realTime = False  # Allow step by step execution via space/enter key
 
@@ -85,6 +85,10 @@ try:
             locals()[k] = v
 except ImportError:
     print("No config file found, using default settings")
+
+# seed number generator
+random_dice = random.Random(SEED)
+random_shuffle = random.Random(SEED)
 
 
 class Log:
@@ -200,8 +204,8 @@ class Player:
                 self.three_way_trade(board)
 
         # roll dice
-        dice1 = random.randint(1, 6)
-        dice2 = random.randint(1, 6)
+        dice1 = random_dice.randint(1, 6)
+        dice2 = random_dice.randint(1, 6)
         log.write(
             self.name
             + " rolls "
@@ -1109,11 +1113,11 @@ class Board:
 
         # Chance
         self.chanceCards = [i for i in range(16)]
-        random.shuffle(self.chanceCards)
+        random_shuffle.shuffle(self.chanceCards)
 
         # Community Chest
         self.communityCards = [i for i in range(16)]
-        random.shuffle(self.communityCards)
+        random_shuffle.shuffle(self.communityCards)
 
     # Does the board have at least one monopoly
     # Used for statistics
@@ -1149,13 +1153,15 @@ class Board:
             rent = 0
 
             # utility
+            # TODO: rent shall be calculated based on the existing dice roll, not a new roll
             if self.b[position].group == "util":
                 if self.b[position].is_monopoly or special == "from_chance":
-                    rent = (random.randint(1, 6) + random.randint(1, 6)) * 10
+                    rent = (random_dice.randint(1, 6) + random_dice.randint(1, 6)) * 10
                 else:
-                    rent = (random.randint(1, 6) + random.randint(1, 6)) * 4
+                    rent = (random_dice.randint(1, 6) + random_dice.randint(1, 6)) * 4
 
             # rail
+            # TODO: Formula for growing rent is base (25) * number of rails
             elif self.b[position].group == "rail":
                 rails = self.count_rails(position)
                 rent = 0 if rails == 0 else 25 * 2**rails
@@ -1264,7 +1270,7 @@ class Board:
 
         # sort by house price and base
         if behaveBuildRandom:
-            random.shuffle(to_build_stuff)
+            random_shuffle.shuffle(to_build_stuff)
         elif behaveBuildCheapest:
             to_build_stuff.sort(key=lambda x: (-x[4], -x[5]))
         else:
@@ -1497,7 +1503,7 @@ def build_player_list(n: int, starting_monies=[]):
         player_attributes = (names[i], starting_monies[i])
         players_attributes.append(player_attributes)
     if shuffle_players:
-        random.shuffle(players_attributes)
+        random_shuffle.shuffle(players_attributes)
     players = [Player(pa[0], pa[1]) for pa in players_attributes]
     return players
 
@@ -1668,10 +1674,6 @@ if __name__ == "__main__":
 
     t = time.time()
     log = Log()
-    if seed != "":
-        random.seed(seed)
-    else:
-        random.seed()
     print(
         "Players:",
         n_players,
@@ -1680,7 +1682,7 @@ if __name__ == "__main__":
         " Games:",
         nSimulations,
         " Seed:",
-        seed,
+        SEED,
     )
     results = run_simulation()
     analyze_results(results)
