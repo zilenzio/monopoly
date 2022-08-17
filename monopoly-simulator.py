@@ -20,7 +20,7 @@ import util
 n_players = 4
 nMoves = 1000
 nSimulations = 1000
-seed = ""  # "" for none
+SEED = None
 shuffle_players = True
 realTime = False  # Allow step by step execution via space/enter key
 
@@ -86,6 +86,10 @@ try:
 except ImportError:
     print("No config file found, using default settings")
 
+# seed number generator
+random_dice = random.Random(SEED)
+random_shuffle = random.Random(SEED)
+
 
 class Log:
     def __init__(self):
@@ -130,6 +134,7 @@ class Player:
         self.cash_limit = (
             exp_unspendable_cash if name == "exp" else behave_unspendable_cash
         )
+        self.dice = (0, 0)
 
     def __str__(self):
         return (
@@ -200,8 +205,8 @@ class Player:
                 self.three_way_trade(board)
 
         # roll dice
-        dice1 = random.randint(1, 6)
-        dice2 = random.randint(1, 6)
+        dice1 = random_dice.randint(1, 6)
+        dice2 = random_dice.randint(1, 6)
         log.write(
             self.name
             + " rolls "
@@ -212,6 +217,7 @@ class Player:
             + str(dice1 + dice2),
             3,
         )
+        self.dice = (dice1, dice2)
 
         # doubles
         if dice1 == dice2 and not self.in_jail:
@@ -270,18 +276,17 @@ class Player:
             self.add_money(settingsSalary)
             log.write(self.name + " gets salary: $" + str(settingsSalary), 3)
 
+        owner_name = ""
+        if hasattr(board.b[self.position], 'owner'):
+            if hasattr(board.b[self.position].owner, 'name'):
+                owner_name = board.b[self.position].owner.name
         log.write(
             self.name
             + " moves to cell "
             + str(self.position)
             + ": "
             + board.b[self.position].name
-            + (
-                " (" + board.b[self.position].owner.name + ")"
-                if type(board.b[self.position]) == Property
-                and board.b[self.position].owner != ""
-                else ""
-            ),
+            + owner_name,
             3,
         )
 
@@ -403,7 +408,7 @@ class Player:
         trade_happened = False
         for i_want in self.plots_wanted[::-1]:
             owner_of_wanted = board.b[i_want].owner
-            if owner_of_wanted == "":
+            if owner_of_wanted is None:
                 continue
             # Find a match betwee what I want / they want / I have / they have
             for they_want in owner_of_wanted.plots_wanted[::-1]:
@@ -458,11 +463,11 @@ class Player:
         trade_happened = False
         for wanted1 in self.plots_wanted[::-1]:
             owner_of_wanted1 = board.b[wanted1].owner
-            if owner_of_wanted1 == "":
+            if owner_of_wanted1 is None:
                 continue
             for wanted2 in owner_of_wanted1.plots_wanted[::-1]:
                 owner_of_wanted2 = board.b[wanted2].owner
-                if owner_of_wanted2 == "":
+                if owner_of_wanted2 is None:
                     continue
                 for wanted3 in owner_of_wanted2.plots_wanted[::-1]:
                     if wanted3 in self.plots_offered:
@@ -853,7 +858,7 @@ class Property(Cell):
         self.cost_house = cost_house
         self.rent_house = rent_house
         self.group = group
-        self.owner = ""
+        self.owner = None
         self.is_mortgaged = False
         self.is_monopoly = False
         self.hasHouses = 0
@@ -867,7 +872,7 @@ class Property(Cell):
             return
 
         # Property up for sale
-        elif self.owner == "":
+        elif self.owner is None:
             if player.wants_to_buy(self.cost_base, self.group):
                 log.write(
                     player.name
@@ -1109,11 +1114,11 @@ class Board:
 
         # Chance
         self.chanceCards = [i for i in range(16)]
-        random.shuffle(self.chanceCards)
+        random_shuffle.shuffle(self.chanceCards)
 
         # Community Chest
         self.communityCards = [i for i in range(16)]
-        random.shuffle(self.communityCards)
+        random_shuffle.shuffle(self.communityCards)
 
     # Does the board have at least one monopoly
     # Used for statistics
@@ -1126,39 +1131,37 @@ class Board:
     # Count the number of rails of the same owner as "position"
     # Used in rent calculations
     def count_rails(self, position):
-        if type(self.b[position]) != Property or self.b[position].group != "rail":
-            return False
         railcount = 0
         this_owner = self.b[position].owner
-        for plot in self.b:
-            if (
-                type(plot) == Property
-                and plot.group == "rail"
-                and plot.owner == this_owner
-                and plot.owner != ""
-                and not plot.is_mortgaged
-            ):
-                railcount += 1
+        if this_owner:
+            for plot in self.b:
+                if (
+                    type(plot) == Property
+                    and plot.group == "rail"
+                    and plot.owner == this_owner
+                ):
+                    railcount += 1
         return railcount
 
     # What is the rent of plot "position"
     # Takes into account utilities, rails, monopoly
 
-    def calculate_rent(self, position, special=""):
+    def calculate_rent(self, position, dice, special=""):
         if type(self.b[position]) == Property:
             rent = 0
+            dice_value = sum(dice)
 
             # utility
             if self.b[position].group == "util":
                 if self.b[position].is_monopoly or special == "from_chance":
-                    rent = (random.randint(1, 6) + random.randint(1, 6)) * 10
+                    rent = dice_value * 10
                 else:
-                    rent = (random.randint(1, 6) + random.randint(1, 6)) * 4
+                    rent = dice_value * 4
 
             # rail
             elif self.b[position].group == "rail":
                 rails = self.count_rails(position)
-                rent = 0 if rails == 0 else 25 * 2**rails
+                rent = 25 * rails
                 if special == "from_chance":
                     rent *= 2
 
@@ -1264,7 +1267,7 @@ class Board:
 
         # sort by house price and base
         if behaveBuildRandom:
-            random.shuffle(to_build_stuff)
+            random_shuffle.shuffle(to_build_stuff)
         elif behaveBuildCheapest:
             to_build_stuff.sort(key=lambda x: (-x[4], -x[5]))
         else:
@@ -1344,7 +1347,7 @@ class Board:
     def sell_all(self, player):
         for plot in self.b:
             if type(plot) == Property and plot.owner == player:
-                plot.owner = ""
+                plot.owner = None
                 plot.is_mortgaged = False
 
     # Get the list of plots player would want to get
@@ -1401,7 +1404,7 @@ class Board:
         for i in range(len(self.b)):
             plot = self.b[i]
             if type(plot) == Property:
-                if plot.owner == "":
+                if plot.owner is None:
                     groups[plot.group] = False
                 else:
                     if plot.group in groups:
@@ -1433,7 +1436,7 @@ class Board:
         # Landed on a property - calculate rent first
         if type(self.b[position]) == Property:
             # calculate the rent one would have to pay (but not pay it yet)
-            rent = self.calculate_rent(position, special=special)
+            rent = self.calculate_rent(position, dice=player.dice, special=special)
             # pass action to to the cell
             self.b[position].action(player, rent, self)
         # landed on a chance, pass board, to track the chance cards
@@ -1497,7 +1500,7 @@ def build_player_list(n: int, starting_monies=[]):
         player_attributes = (names[i], starting_monies[i])
         players_attributes.append(player_attributes)
     if shuffle_players:
-        random.shuffle(players_attributes)
+        random_shuffle.shuffle(players_attributes)
     players = [Player(pa[0], pa[1]) for pa in players_attributes]
     return players
 
@@ -1668,10 +1671,6 @@ if __name__ == "__main__":
 
     t = time.time()
     log = Log()
-    if seed != "":
-        random.seed(seed)
-    else:
-        random.seed()
     print(
         "Players:",
         n_players,
@@ -1680,7 +1679,7 @@ if __name__ == "__main__":
         " Games:",
         nSimulations,
         " Seed:",
-        seed,
+        SEED,
     )
     results = run_simulation()
     analyze_results(results)
